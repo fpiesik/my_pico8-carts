@@ -1,10 +1,22 @@
 pico-8 cartridge // http://www.pico-8.com
-version 42
+version 43
 __lua__
- s=30 --speed
+--game settings
+s=40 --speed
+g={0,0,24,0,0,0,24,0}--beat-pattern
+pl={12,0,14,14,16,16,17,19} --playback
+lt=2    -- vorlauf in beats
+
+--bild
+bx=64   -- startposition x
+by=128  -- startposition y
+b0=64   -- y-amplitude
+
+--globals
 ti=s/120.4918 -- zeitdauer eines beats in sekunden
 ld={}-- liste der letzten timing-abweichungen ("late/delays")
 md=32-- maximale laenge von ld (max. gespeicherte treffer)
+
 ds=ti-- skalierungsfaktor fuer anzeige (delta-skala)
 sc=0-- score
 ct=0-- zeitstempel des letzten korrekten tastendrucks
@@ -20,15 +32,14 @@ bs=1-- sfx spielstart-/ende-sound
 f=0-- spielstatus (0 = aktiv, 1 = beendet)
 rs=8-- schwellenwert fuer aufeinanderfolgende fehlversuche (reset)
 r=0-- zaehler fuer tastendruecke
-g={0,0,24,0,0,0,24,0}--beat-pattern
 c={0,0,0,0}  -- leeres rhythmusmuster (unbenutzt)
-pl={12,0,14,14,16,16,17,19} --playback
 
 function mk_bt(p,sn)set_s(sn,s)set_l(sn,0,#p)for i=1,#p do if p[i]>0 then set_n(sn,i-1,mk_n(p[i],1,7,0))end end end
 function mk_n(p,i,v,e)return{p+((i%4)<<6),(i\8<<7)+(e<<4)+(v<<1)+(i%8)\4}end
 function set_n(sfx,t,n)a=0x3200+68*sfx+2*t poke(a,n[1])poke(a+1,n[2])end
 function set_s(sfx,sp)poke(0x3200+68*sfx+65,sp)end
 function set_l(sfx,s,e)a=0x3200+68*sfx poke(a+66,s)poke(a+67,e)end
+
 
 mk_bt(g,gs)
 mk_bt(c,cs)
@@ -40,11 +51,9 @@ set_n(ps[1],0,mk_n(36,1,7,1))
 set_n(ps[2],0,mk_n(36,1,7,3))
 set_n(ps[3],0,mk_n(35,1,7,0))
 set_n(ps[4],0,mk_n(34,1,7,0))
-lt=2    -- vorlauf in beats
-bx=64   -- startposition x
-by=128  -- startposition y
-a=40    -- x-amplitude
-b0=64   -- y-amplitude
+
+a=40    -- flugbahn-breite
+
 pf=0    -- framezaehler
 pw=0.05 -- praezisionsfenster
 gw=0.1  -- good-fenster
@@ -92,35 +101,74 @@ function _update60()
     b.th=t0
    end
   elseif b.s=='hm' then
-   if t0-b.th>=ht then deli(bl,i)end
+   if t0-b.th>=ht then 
+   	deli(bl,i)
+   end
   elseif b.s=='hp'or b.s=='hg'or b.s=='hm' then
-   if t0-b.th>=ht then deli(bl,i)end
-  end
- end
- if btnp(5) then 
- 	f=0 r=0 sfx(gs,0)sfx(bs,2)sfx(cs,3) sc=0 ld={}
- end
- if btnp(4) and f==0then
-  pf=0 dv={}
-  if cb==1 then d0=t0-ct;if abs(d0)<=mw then add(dv,d0)end end
-  if nb==1 then d1=t0-nt;if abs(d1)<=mw then add(dv,d1)end end
-  if #dv>0 then d=dv[1]for i=2,#dv do if abs(dv[i])<abs(d)then d=dv[i]end end else d=mw end
-  sc+=1-abs(d)/mw
-  add(ld,d)if #ld>md then deli(ld,1)end
-  ad=abs(d)h=''
-  if ad<=pw then h='hp'sfx(ps[1],1)
-  elseif ad<=gw then h='hg'sfx(ps[2],1)
-  elseif ad<=mw then h='hm'sfx(ps[3],1)
-  else h='n'sfx(ps[4],1)end
-  for i=#bl,1,-1 do
-   b=bl[i]
-   if b.s=='i'and not b.h then
-    bd=t0-(b.st+b.tt)
-    if abs(bd)<=mw then b.s=h;b.th=t0;b.h=true;b.d=d;break end
+   if t0-b.th>=ht then 
+   	deli(bl,i)
    end
   end
  end
+ 
+ --restart
+ if btnp(5) then 
+ 	f=0 
+ 	r=0 
+ 	sfx(gs,0)
+ 	sfx(bs,2)
+ 	sfx(cs,3) 
+ 	sc=0 
+ 	ld={}
+ end
+ 
+ --beat the ball
+ if btnp(4) and f==0 then
+  pf=0 dv={}
+  if cb==1 then 
+  	d0=t0-ct
+  	if abs(d0)<=mw then 
+  		add(dv,d0)
+  	end 
+  end
+  if nb==1 then 
+  	d1=t0-nt
+  	if abs(d1)<=mw then 
+  		add(dv,d1)
+  	end 
+  end
+  if #dv>0 then 
+  	d=dv[1]
+  	for i=2,#dv do 
+  		if abs(dv[i])<abs(d)then 
+  			d=dv[i]
+  		end 
+  	end 
+  else 
+  	d=mw 
+  end
+  sc+=1-abs(d)/mw
+  add(ld,d)
+  if #ld>md then 
+  	deli(ld,1)
+  end
+  ad=abs(d)h=''
+  if ad<=pw then 
+  	h='hp'
+  	sfx(ps[1],1)
+  elseif ad<=gw then 
+  	h='hg'
+  	sfx(ps[2],1)
+  elseif ad<=mw then 
+  	h='hm'sfx(ps[3],1)
+  else 
+  	h='n'
+  	sfx(ps[4],1)
+  end
+  upd_ball()
+ end
 end
+
 function _draw()
  cls(0)
  circfill(24,45,24,9)circfill(24,45,16,10)circfill(24,45,8,11)
@@ -132,20 +180,41 @@ function _draw()
   print(flr(sc*10),21,43)
  end
  if f==0 then
-  for b in all(bl)do
-   if b.s=='i'then
-    circfill(b.x,b.y,4,8)
-   elseif b.s=='hp'or b.s=='hg' then
-    p=(t0-b.th)/ht
-    x=b.x-p*128*(b.d*2+1)
-    y=b.y-p*128*(-b.d*2+1)
-    circfill(x,y,4,10)
-    print(flr((1-abs(b.d)/mw)*10),21,43)
-   end
-  end
+		drw_ball()
  end
 end
 
+-->8
+function upd_ball()
+	for i=#bl,1,-1 do
+  b=bl[i]
+  if b.s=='i'and not b.h then
+   bd=t0-(b.st+b.tt)
+   if abs(bd)<=mw then 
+   b.s=h
+   b.th=t0
+   b.h=true
+   b.d=d
+   break 
+   end
+  end
+ end
+end 
+
+
+function drw_ball()
+ for b in all(bl)do
+  if b.s=='i'then
+   circfill(b.x,b.y,4,8)
+  elseif b.s=='hp'or b.s=='hg' then
+   p=(t0-b.th)/ht
+   x=b.x-p*128*(b.d*2+1)
+   y=b.y-p*128*(-b.d*2+1)
+   circfill(x,y,4,10)
+   print(flr((1-abs(b.d)/mw)*10),21,43)
+  end
+ end
+end
 __gfx__
 00000000006363600063636000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000060000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

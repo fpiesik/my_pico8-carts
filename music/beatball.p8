@@ -32,24 +32,31 @@ nb=0-- flag: naechster beat aktiv? (0 = nein, 1 = ja)
 pb=0-- flag: vorheriger beat aktiv? (derzeit ungenutzt)
 
 --sounds
+chg = 2 -- goal channel
+chp = 3 -- player channel
+ 
 ps={2,3,4,5}--sfx trefferklaenge [prれさzise, good, mittel, falsch]
 cs=7-- sfx aktuellen beat-preset
 gs=6-- sfx hintergrund-gong (globaler sound)
 bs=1-- sfx spielstart-/ende-sound
 
 f=0-- spielstatus (0 = aktiv, 1 = beendet)
-rs=8-- schwellenwert fuer aufeinanderfolgende fehlversuche (reset)
+rs=8-- anzahl baelle? 
 r=0-- zaehler fuer tastendruecke
-c={0,0,0,0}  -- leeres rhythmusmuster (unbenutzt)
+--c={0,0,0,0}  -- leeres rhythmusmuster (unbenutzt)
 
 
 function _init()
+	for i=9,30 do
+		set_s(i,s)
+	end
 	mk_bt(g,gs)
-	mk_bt(c,cs)
-	mk_bt(pl,bs)
-	sfx(gs,0)
-	sfx(cs,3)
-	sfx(bs,2)
+	--mk_bt(c,cs)
+	--mk_bt(pl,bs)
+	sfx(gs,chg)
+	music(0)
+	--sfx(cs,3)
+	--sfx(bs,2)
 	set_n(ps[1],0,mk_n(36,1,7,1))
 	set_n(ps[2],0,mk_n(36,1,7,3))
 	set_n(ps[3],0,mk_n(35,1,7,0))
@@ -66,10 +73,18 @@ bl={}   -- liste aktiver noten
 
 function _update60()
  t0=t()
- if f==0 then k=stat(50)end
+ if f==0 then k=stat(50+chg)end
  if k!=lk then
-  pt=ct
-  if r>rs then f=1 sfx(0,0)sfx(0,1)sfx(0,2)sfx(0,3)end
+  pt=ct  
+  --reset n fehlversuche groesser rs
+  if r>rs then 
+  	f=1 
+  	sfx(0,0)
+  	sfx(0,1)
+  	sfx(0,2)
+  	sfx(0,3)
+  end
+  
   if k==0 then r+=1 end
   if g[k+1]>0 then 
   	cb=1 
@@ -85,9 +100,10 @@ function _update60()
   end
   tn=(k+lt)%#g
   
+  --add ball
   if g[tn+1]>0 and r>1 then
    --mk_bt(c,cs)
-   sfx(2)--sound ball startet
+   --sfx(2)--sound ball startet
    add(bl,
    {s='i',
    st=t0,
@@ -429,4 +445,7 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-011900080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011900080c3500e350103501135000000133501535017350000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__music__
+00 0a424344
+

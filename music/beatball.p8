@@ -2,60 +2,62 @@ pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
 --game settings
-s=40 --speed
+s=30 --speed
 g={0,0,24,0,0,0,24,0}--beat-pattern
 pl={12,0,14,14,16,16,17,19} --playback
 lt=2    -- vorlauf in beats
+pw=0.05 -- praezisionsfenster
 
 --bild
 bx=64   -- startposition x
 by=128  -- startposition y
 b0=64   -- y-amplitude
+a=40    -- flugbahn-breite
 
 --globals
 ti=s/120.4918 -- zeitdauer eines beats in sekunden
 ld={}-- liste der letzten timing-abweichungen ("late/delays")
 md=32-- maximale laenge von ld (max. gespeicherte treffer)
 
-ds=ti-- skalierungsfaktor fuer anzeige (delta-skala)
-sc=0-- score
+ds=ti -- skalierungsfaktor fuer anzeige (delta-skala)
+sc=0 -- score
+
+--measure
 ct=0-- zeitstempel des letzten korrekten tastendrucks
 nt=0-- zeitstempel des naechsten beats
 pt=0-- zeitstempel des vorherigen zustandswechsel (prev time)
+
 cb=0-- flag: aktueller beat aktiv? (0 = nein, 1 = ja)
 nb=0-- flag: naechster beat aktiv? (0 = nein, 1 = ja)
 pb=0-- flag: vorheriger beat aktiv? (derzeit ungenutzt)
+
+--sounds
 ps={2,3,4,5}--sfx trefferklaenge [prれさzise, good, mittel, falsch]
 cs=7-- sfx aktuellen beat-preset
 gs=6-- sfx hintergrund-gong (globaler sound)
 bs=1-- sfx spielstart-/ende-sound
+
 f=0-- spielstatus (0 = aktiv, 1 = beendet)
 rs=8-- schwellenwert fuer aufeinanderfolgende fehlversuche (reset)
 r=0-- zaehler fuer tastendruecke
 c={0,0,0,0}  -- leeres rhythmusmuster (unbenutzt)
 
-function mk_bt(p,sn)set_s(sn,s)set_l(sn,0,#p)for i=1,#p do if p[i]>0 then set_n(sn,i-1,mk_n(p[i],1,7,0))end end end
-function mk_n(p,i,v,e)return{p+((i%4)<<6),(i\8<<7)+(e<<4)+(v<<1)+(i%8)\4}end
-function set_n(sfx,t,n)a=0x3200+68*sfx+2*t poke(a,n[1])poke(a+1,n[2])end
-function set_s(sfx,sp)poke(0x3200+68*sfx+65,sp)end
-function set_l(sfx,s,e)a=0x3200+68*sfx poke(a+66,s)poke(a+67,e)end
 
+function _init()
+	mk_bt(g,gs)
+	mk_bt(c,cs)
+	mk_bt(pl,bs)
+	sfx(gs,0)
+	sfx(cs,3)
+	sfx(bs,2)
+	set_n(ps[1],0,mk_n(36,1,7,1))
+	set_n(ps[2],0,mk_n(36,1,7,3))
+	set_n(ps[3],0,mk_n(35,1,7,0))
+	set_n(ps[4],0,mk_n(34,1,7,0))
+end
 
-mk_bt(g,gs)
-mk_bt(c,cs)
-mk_bt(pl,bs)
-sfx(gs,0)
-sfx(cs,3)
-sfx(bs,2)
-set_n(ps[1],0,mk_n(36,1,7,1))
-set_n(ps[2],0,mk_n(36,1,7,3))
-set_n(ps[3],0,mk_n(35,1,7,0))
-set_n(ps[4],0,mk_n(34,1,7,0))
-
-a=40    -- flugbahn-breite
 
 pf=0    -- framezaehler
-pw=0.05 -- praezisionsfenster
 gw=0.1  -- good-fenster
 mw=ti/2 -- max-toleranz
 ht=0.8  -- hit-animation-dauer
@@ -82,10 +84,19 @@ function _update60()
   	nb=0 
   end
   tn=(k+lt)%#g
+  
   if g[tn+1]>0 and r>1 then
    --mk_bt(c,cs)
-   --sfx(2)
-   add(bl,{s='i',st=t0,tt=lt*ti,th=0,x=0,y=0,h=false,d=nil})
+   sfx(2)--sound ball startet
+   add(bl,
+   {s='i',
+   st=t0,
+   tt=lt*ti,
+   th=0,
+   x=0,
+   y=0,
+   h=false,
+   d=nil})
   end
   lk=k
  end
@@ -152,7 +163,8 @@ function _update60()
   if #ld>md then 
   	deli(ld,1)
   end
-  ad=abs(d)h=''
+  ad=abs(d)
+  h=''
   if ad<=pw then 
   	h='hp'
   	sfx(ps[1],1)
@@ -171,20 +183,39 @@ end
 
 function _draw()
  cls(0)
- circfill(24,45,24,9)circfill(24,45,16,10)circfill(24,45,8,11)
- if pf>10 then sspr(8,0,8,8,105,112,16,16)else sspr(16,0,8,8,105,112,16,16)end
+ circfill(24,45,24,9)
+ circfill(24,45,16,10)
+ circfill(24,45,8,11)
+ if pf>10 then 
+ 	sspr(8,0,8,8,105,112,16,16)
+ else 
+ 	sspr(16,0,8,8,105,112,16,16)
+ end
  pf+=1
+ 
+ --plot hits
  line(24,80,24,80+md,5)
- for i=1,#ld do d=ld[i];x=(d/ds)*32+24;y=i+79;pset(x,y,7)end
+ for i=1,#ld do 
+ 	d=ld[i]
+ 	x=(d/ds)*32+24
+ 	y=i+79
+ 	pset(x,y,7)
+ end
+ 
+ --print score
  if f==1 then
   print(flr(sc*10),21,43)
  end
+ 
+ 
  if f==0 then
 		drw_ball()
  end
 end
 
 -->8
+--ball
+
 function upd_ball()
 	for i=#bl,1,-1 do
   b=bl[i]
@@ -201,7 +232,6 @@ function upd_ball()
  end
 end 
 
-
 function drw_ball()
  for b in all(bl)do
   if b.s=='i'then
@@ -215,6 +245,40 @@ function drw_ball()
   end
  end
 end
+-->8
+--helpers
+
+function mk_bt(p,sn)
+	set_s(sn,s)
+	set_l(sn,0,#p)
+	for i=1,#p do 
+		if p[i]>0 then 
+			set_n(sn,i-1,mk_n(p[i],1,7,0))
+		end 
+	end 
+end
+
+function mk_n(p,i,v,e)
+	return{p+((i%4)<<6),
+	(i\8<<7)+(e<<4)+(v<<1)+(i%8)\4}
+end
+
+function set_n(sfx,t,n)
+	local a=0x3200+68*sfx+2*t 
+	poke(a,n[1])
+	poke(a+1,n[2])
+end
+
+function set_s(sfx,sp)
+	poke(0x3200+68*sfx+65,sp)
+end
+
+function set_l(sfx,s,e)
+	local a=0x3200+68*sfx 
+	poke(a+66,s)
+	poke(a+67,e)
+end
+
 __gfx__
 00000000006363600063636000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000060000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

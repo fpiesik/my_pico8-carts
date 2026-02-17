@@ -1,23 +1,27 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+
 --game settings
-s=30 --speed
+spd=30 --speed
 g={0,0,24,0,0,0,24,0}--beat-pattern
 pl={12,0,14,14,16,16,17,19} --playback
 lt=2    -- vorlauf in beats
 pw=0.05 -- praezisionsfenster
+rs=8-- anzahl baelle? 
 
 --bild
-bx=64   -- startposition x
-by=128  -- startposition y
-b0=64   -- y-amplitude
-a=40    -- flugbahn-breite
+bll_x=64   -- startposition x
+bll_y=128  -- startposition y
+bll_h=64   -- y-amplitude
+bll_w=40    -- flugbahn-breite
 
 --globals
-ti=s/120.4918 -- zeitdauer eines beats in sekunden
+ti=spd/120.4918 -- zeitdauer eines beats in sekunden
 ld={}-- liste der letzten timing-abweichungen ("late/delays")
 md=32-- maximale laenge von ld (max. gespeicherte treffer)
+f=0-- spielstatus (0 = aktiv, 1 = beendet)
+r=0-- zaehler fuer tastendruecke
 
 ds=ti -- skalierungsfaktor fuer anzeige (delta-skala)
 sc=0 -- score
@@ -33,29 +37,17 @@ pb=0-- flag: vorheriger beat aktiv? (derzeit ungenutzt)
 
 --sounds
 chg = 2 -- goal channel
-chp = 3 -- player channel
- 
-ps={2,3,4,5}--sfx trefferklaenge [prれさzise, good, mittel, falsch]
-cs=7-- sfx aktuellen beat-preset
-gs=6-- sfx hintergrund-gong (globaler sound)
-bs=1-- sfx spielstart-/ende-sound
-
-f=0-- spielstatus (0 = aktiv, 1 = beendet)
-rs=8-- anzahl baelle? 
-r=0-- zaehler fuer tastendruecke
---c={0,0,0,0}  -- leeres rhythmusmuster (unbenutzt)
-
+chp = 3 -- hit channel
+ps={10,11,12,13}--sfx trefferklaenge [prれさzise, good, mittel, falsch]
+gs=15-- sfx hintergrund-gong (globaler sound)
 
 function _init()
-	for i=9,30 do
-		set_s(i,s)
+	for i=20,50 do
+		set_s(i,spd)
 	end
 	mk_bt(g,gs)
-	--mk_bt(c,cs)
-	--mk_bt(pl,bs)
-	sfx(gs,chg)
-	music(0)
-	--sfx(cs,3)
+	sfx(gs,chg) --play goal
+	--music(0)
 	--sfx(bs,2)
 	set_n(ps[1],0,mk_n(36,1,7,1))
 	set_n(ps[2],0,mk_n(36,1,7,3))
@@ -73,7 +65,11 @@ bl={}   -- liste aktiver noten
 
 function _update60()
  t0=t()
- if f==0 then k=stat(50+chg)end
+ 
+ if f==0 then 
+ 	k=stat(50+chg)
+ end
+ 
  if k!=lk then
   pt=ct  
   --reset n fehlversuche groesser rs
@@ -85,27 +81,33 @@ function _update60()
   	sfx(0,3)
   end
   
-  if k==0 then r+=1 end
+  if k==0 then 
+  	r+=1 
+  end
+  
   if g[k+1]>0 then 
   	cb=1 
   	ct=t0 
   else 
   	cb=0 
   end
+  
   if g[((k+1)%#g)+1]>0 then 
   	nb=1 
   	nt=t0+ti 
   else 
   	nb=0 
   end
+  
+  
   tn=(k+lt)%#g
   
   --add ball
   if g[tn+1]>0 and r>1 then
    --mk_bt(c,cs)
-   --sfx(2)--sound ball startet
+   sfx(2)--sound ball startet
    add(bl,
-   {s='i',
+   {spd='i',
    st=t0,
    tt=lt*ti,
    th=0,
@@ -118,20 +120,20 @@ function _update60()
  end
  for i=#bl,1,-1 do
   b=bl[i]
-  if b.s=='i' then
+  if b.spd=='i' then
    p=(t0-b.st)/b.tt
    a0=0.5*(1-p)
-   b.x=bx+a*cos(a0)
-   b.y=by+b0*sin(a0)
+   b.x=bll_x+bll_w*cos(a0)
+   b.y=bll_y+bll_h*sin(a0)
    if p>=1.2 then
-    b.s='hm'
+    b.spd='hm'
     b.th=t0
    end
-  elseif b.s=='hm' then
+  elseif b.spd=='hm' then
    if t0-b.th>=ht then 
    	deli(bl,i)
    end
-  elseif b.s=='hp'or b.s=='hg'or b.s=='hm' then
+  elseif b.spd=='hp'or b.spd=='hg'or b.spd=='hm' then
    if t0-b.th>=ht then 
    	deli(bl,i)
    end
@@ -199,6 +201,7 @@ end
 
 function _draw()
  cls(0)
+ print(k)
  circfill(24,45,24,9)
  circfill(24,45,16,10)
  circfill(24,45,8,11)
@@ -235,10 +238,10 @@ end
 function upd_ball()
 	for i=#bl,1,-1 do
   b=bl[i]
-  if b.s=='i'and not b.h then
+  if b.spd=='i'and not b.h then
    bd=t0-(b.st+b.tt)
    if abs(bd)<=mw then 
-   b.s=h
+   b.spd=h
    b.th=t0
    b.h=true
    b.d=d
@@ -250,9 +253,9 @@ end
 
 function drw_ball()
  for b in all(bl)do
-  if b.s=='i'then
+  if b.spd=='i'then
    circfill(b.x,b.y,4,8)
-  elseif b.s=='hp'or b.s=='hg' then
+  elseif b.spd=='hp'or b.spd=='hg' then
    p=(t0-b.th)/ht
    x=b.x-p*128*(b.d*2+1)
    y=b.y-p*128*(-b.d*2+1)
@@ -265,11 +268,11 @@ end
 --helpers
 
 function mk_bt(p,sn)
-	set_s(sn,s)
+	set_s(sn,spd)
 	set_l(sn,0,#p)
 	for i=1,#p do 
 		if p[i]>0 then 
-			set_n(sn,i-1,mk_n(p[i],1,7,0))
+			set_n(sn,i-1,mk_n(p[i],1,0,0))
 		end 
 	end 
 end
@@ -280,19 +283,19 @@ function mk_n(p,i,v,e)
 end
 
 function set_n(sfx,t,n)
-	local a=0x3200+68*sfx+2*t 
-	poke(a,n[1])
-	poke(a+1,n[2])
+	local bll_w=0x3200+68*sfx+2*t 
+	poke(bll_w,n[1])
+	poke(bll_w+1,n[2])
 end
 
 function set_s(sfx,sp)
 	poke(0x3200+68*sfx+65,sp)
 end
 
-function set_l(sfx,s,e)
-	local a=0x3200+68*sfx 
-	poke(a+66,s)
-	poke(a+67,e)
+function set_l(sfx,spd,e)
+	local bll_w=0x3200+68*sfx 
+	poke(bll_w+66,spd)
+	poke(bll_w+67,e)
 end
 
 __gfx__
@@ -445,7 +448,18 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-011900080c3500e350103501135000000133501535017350000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011900080c3000e300103001130000000133001530017300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000100c0000000000000000000c0000000000000000000c0000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000081800000000000001a00000000000001c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0110000000000000000c0000000000000000000c0000000035000000000c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0110000018050000001c0501d0501f050000000000000000230500000024050000000000000000000000000018050000001c0501d0501f0500000000000000002305000000240500000028050000000000000000
+011000080c1530000000000000000c655000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
-00 0a424344
+03 14154344
 

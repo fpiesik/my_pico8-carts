@@ -1,7 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 42
+version 43
 __lua__
 function _init()
+	gs="intro" --game state
 	ms=0 --metro sfx
 	qs=1 --question sfx
 	is=2 --intro sfx
@@ -20,8 +21,8 @@ function _init()
 	ht=0 --hits
 	nh=0 --nohits
 	sh=0 --subhits
-	bi=4 --button enter
-	br=5 --btton restart
+	bi=5 --button enter
+	br=4 --btton restart
 	fb=-1 --feedback
 	tm=60 --time
 	tl=1 --time left
@@ -40,7 +41,23 @@ function _init()
 	menuitem(4, "num_beats: "..nc, m_nc)
  menuitem(5, "num_subd.: "..ns, m_ns)
 end
+
 function _update()
+	if gs=="intro" then
+		upd_intro()
+	end
+	if gs=="play" then
+		upd_play()
+	end
+end
+
+function upd_intro()
+	if btnp(5) then
+		gs="play"
+	end
+end
+
+function upd_play()
 	grd:upd()
 	gmo:upd()
 	if itr.it==0 and gmo.go==0 then
@@ -49,14 +66,31 @@ function _update()
 	end
 	if (itr.it==1) itr:upd()
 end
+
 function _draw()
- cls(0)
+ 
+	if gs=="intro" then
+		drw_intro()
+	end
+	if gs=="play" then
+		drw_play()
+	end
+end
+
+function drw_intro()
+	cls(0)
+	print("hier steht, wie das spiel")
+	print("funktioniert")
+	print("druecke x um zu beginnen")
+end
+
+function drw_play()
+	cls(0)
 	if gmo.go==0 and itr.it==0 then
 		fdb:drw()
 		grd:drw()
 		crs:drw()
 		drw_st()
-		
 	end
 	if itr.it==1 then
 		itr:drw()
@@ -66,6 +100,7 @@ function _draw()
 		gmo:drw()
 	end
 end
+
 function m_vc(b)
  if(b&1 > 0) vc-=1 
  if(b&2 > 0) vc+=1 
@@ -334,8 +369,8 @@ function drw_st()
  ?tl,59,12,7
  ?"where do the sounds hide?",15,2,5
  ?"⬅️➡️⬆️⬇️: select",30,110,5
- ?"🅾️ or c: enter",34,116,5
- ?"❎ or v + ⬅️➡️: -+ speed",20,122,5
+ ?"❎ or v: enter",34,116,5
+ ?"🅾️ or c + ⬅️➡️: -+ speed",20,122,5
 end
 
 fdb={

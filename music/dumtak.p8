@@ -1,7 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 43
 __lua__
-
 function _init()
 	--make an index of the game states
 	for k,v in pairs(gsts) do

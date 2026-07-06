@@ -14,18 +14,20 @@ function _draw()
  cls(1)
 	map()
 	if(gst==gsidx["menu"])menu:draw()
+	if(gst==gsidx["intro"])intro:draw()
 	if(gst==gsidx["hear"])hear:draw()
 	if(gst==gsidx["play"])play:draw()
 end
 
 function _update60()      
 	if(gst==gsidx["menu"])menu:upd()
+	if(gst==gsidx["intro"])intro:upd()
 	if(gst==gsidx["hear"])hear:upd()
 	if(gst==gsidx["play"])play:upd()
 end
 
 
-gsts={"menu","play","hear"} --game states
+gsts={"menu","intro","play","hear"} --game states
 gst=1 --actual game state
 gsidx={}
 a_bt=2 --active beat
@@ -101,10 +103,11 @@ menu={
 	x = 40,
 	y = 60,
 	spc = 7,
-	idx = 2,
+	idx = 1,
+	opts = {"play","hear"},
 	draw=function(s)
-		for i = 2, #gsts do 
-			print(gsts[i],s.x,s.y+i*s.spc,7)
+		for i = 1, #s.opts do
+			print(s.opts[i],s.x,s.y+i*s.spc,7)
 			--if(i==s.idx)rect(s.x-2,s.y+i*s.spc-2,s.x+30,s.y+i*s.spc+6,7)
 			if(i==s.idx)print("➡️",s.x-10,s.y+i*s.spc,7)
 		end
@@ -113,16 +116,50 @@ menu={
 	upd=function(s)
 		if btnp(3) then
 			s.idx+=1
-			if(s.idx>#gsts)s.idx=#gsts
+			if(s.idx>#s.opts)s.idx=#s.opts
 		end
 		if btnp(2) then
 			s.idx-=1
-			if(s.idx<2)s.idx=2
+			if(s.idx<1)s.idx=1
 		end
 		if btnp(4) then
-			gst=s.idx
-   if(gst==gsidx["hear"])hear:init()
-   if(gst==gsidx["play"])play:init()
+			intro.mode=s.opts[s.idx]
+			gst=gsidx["intro"]
+			sfx(-1)
+			music(-1)
+		end
+	end
+}
+
+--mode explanation screen
+intro={
+	mode="play",
+	draw=function(s)
+		spr(128,0,0,16,4)
+		print(s.mode.." mode",34,35,7)
+		if s.mode=="play" then
+			print("spiele den rhythmus",14,50,7)
+			print("passend zum kreis.",17,58,7)
+			print("⬅️ tak   ➡️ dum",25,74,11)
+			print("⬆️/⬇️ tempo",31,84,3)
+			print("🅾️/❎ rhythmus",25,94,3)
+		else
+			print("hoere den rhythmus",16,50,7)
+			print("und baue ihn nach.",14,58,7)
+			print("⬅️/➡️ position",24,74,11)
+			print("⬆️/⬇️ silbe",31,84,11)
+			print("🅾️ pruefen",36,94,3)
+		end
+		print("❎ start",44,114,10)
+	end,
+	upd=function(s)
+		if btnp(4) then
+			gst=gsidx[s.mode]
+			if(gst==gsidx["hear"])hear:init()
+			if(gst==gsidx["play"])play:init()
+		end
+		if btnp(5) then
+			gst=gsidx["menu"]
 		end
 	end
 }
@@ -1181,4 +1218,3 @@ __music__
 01 4b420b14
 02 4c420c15
 02 01024344
-

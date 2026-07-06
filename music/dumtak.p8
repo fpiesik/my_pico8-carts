@@ -122,6 +122,7 @@ menu={
 			if(i==s.idx)print("➡️",s.x-10,s.y+i*s.spc,7)
 		end
   spr(128,0,0,16,4)
+  print("❎/c start",44,114,10)
 	end,
 	upd=function(s)
 		if btnp(3) then
@@ -151,16 +152,16 @@ intro={
 			print("spiele den rhythmus",14,50,7)
 			print("passend zum kreis.",17,58,7)
 			print("⬅️ tak   ➡️ dum",25,74,11)
-			print("⬆️/⬇️ tempo",31,84,3)
-			print("🅾️/❎ rhythmus",25,94,3)
+			print("⬆️ ⬇️ tempo",31,84,3)
+			print("🅾️/x ❎/c rhythmus",25,94,3)
 		else
 			print("hoere den rhythmus",16,50,7)
 			print("und baue ihn nach.",14,58,7)
-			print("⬅️/➡️ position",24,74,11)
-			print("⬆️/⬇️ silbe",31,84,11)
-			print("🅾️ pruefen",36,94,3)
+			print("⬅️ ➡️ position",24,74,11)
+			print("⬆️ ⬇️ silbe",31,84,11)
+			print("🅾️/x pruefen",36,94,3)
 		end
-		print("❎ start",44,114,10)
+		print("❎/c start",44,114,10)
 	end,
 	upd=function(s)
 		if btnp(4) then
@@ -1228,3 +1229,4 @@ __music__
 01 4b420b14
 02 4c420c15
 02 01024344
+

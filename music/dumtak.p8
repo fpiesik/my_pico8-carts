@@ -13,17 +13,27 @@ end
 function _draw()
  cls(1)
 	map()
-	if(gst==gsidx["menu"])menu:draw()
-	if(gst==gsidx["intro"])intro:draw()
-	if(gst==gsidx["hear"])hear:draw()
-	if(gst==gsidx["play"])play:draw()
+	if gst==gsidx["menu"] then
+		menu:draw()
+	elseif gst==gsidx["intro"] then
+		intro:draw()
+	elseif gst==gsidx["hear"] then
+		hear:draw()
+	elseif gst==gsidx["play"] then
+		play:draw()
+	end
 end
 
 function _update60()      
-	if(gst==gsidx["menu"])menu:upd()
-	if(gst==gsidx["intro"])intro:upd()
-	if(gst==gsidx["hear"])hear:upd()
-	if(gst==gsidx["play"])play:upd()
+	if gst==gsidx["menu"] then
+		menu:upd()
+	elseif gst==gsidx["intro"] then
+		intro:upd()
+	elseif gst==gsidx["hear"] then
+		hear:upd()
+	elseif gst==gsidx["play"] then
+		play:upd()
+	end
 end
 
 

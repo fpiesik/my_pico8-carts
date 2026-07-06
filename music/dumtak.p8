@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+
 function _init()
 	--make an index of the game states
 	for k,v in pairs(gsts) do
@@ -153,21 +154,21 @@ intro={
 	mode="play",
 	draw=function(s)
 		spr(128,0,0,16,4)
-		print(s.mode.." mode",34,35,7)
+		print(s.mode.." mode",24,40,7)
 		if s.mode=="play" then
-			print("spiele den rhythmus",14,50,7)
-			print("passend zum kreis.",17,58,7)
-			print("⬅️ tak   ➡️ dum",25,74,11)
-			print("⬆️ ⬇️ tempo",31,84,3)
-			print("🅾️/x ❎/c rhythmus",25,94,3)
+			print("spiele den rhythmus",24,50,7)
+			print("passend zum kreis.",24,58,7)
+			print("⬅️ tak   ➡️ dum",24,74,3)
+			print("⬆️ ⬇️ tempo",24,84,3)
+			print("🅾️/x ❎/c rhythmus",24,94,3)
 		else
-			print("hoere den rhythmus",16,50,7)
-			print("und baue ihn nach.",14,58,7)
-			print("⬅️ ➡️ position",24,74,11)
-			print("⬆️ ⬇️ silbe",31,84,11)
-			print("🅾️/x pruefen",36,94,3)
+			print("hoere den rhythmus",24,50,7)
+			print("und baue ihn nach.",24,58,7)
+			print("⬅️ ➡️ position",24,74,3)
+			print("⬆️ ⬇️ silbe",24,84,3)
+			print("🅾️/x pruefen",24,94,3)
 		end
-		print("❎/c start",44,114,10)
+		print("❎/c start",24,114,9)
 	end,
 	upd=function(s)
 		if btnp(4) then
@@ -274,8 +275,8 @@ hear={
 		print(scr.hit,109,5,clrs.scr[1])
 		print(scr.mss,117,5,clrs.scr[2])
 		
-		print("bpm:",5,120,clrs.spd)	
-		print(flr(spd2bpm(spd)),21,120,clrs.spd)	
+		print("bpm:",5,12,clrs.spd)	
+		print(flr(spd2bpm(spd)),21,12,clrs.spd)	
 
 		if(stat(50+btch)<=8)print(stat(50+btch)+1, 109, 120,clrs.tsig)
 		if(stat(50+btch)>8)print(stat(50+btch)+1, 105, 120,clrs.tsig)

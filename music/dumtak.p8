@@ -323,15 +323,20 @@ play={
 			self.qstbt[i]=beats[btord[a_bt]][i]
    self.qbang[i]= (i-1)/self.btl
 		end 
-  --setup metronome
-  set_spd(metrosfx, spd)
-  set_loop(metrosfx,0,self.btl)
-  sfx(metrosfx,metroch)
-  --setup music
+  --setup music first, then the
+  --metronome clock. otherwise
+  --music() can replace the sfx on
+  --metroch and the visual clock
+  --will follow the song pattern
+  --instead of the rhythm length.
   for i=10,30 do
    set_spd(i, spd)
   end
   music()
+  --setup metronome
+  set_spd(metrosfx, spd)
+  set_loop(metrosfx,0,self.btl)
+  sfx(metrosfx,metroch)
 
 		plcirc.btl = self.btl
 		plcirc.abtl = self.abtl
@@ -346,6 +351,11 @@ play={
    end
   end
   plcirc.maxhitdisp=plcirc.dumtaks
+  plcirc.plang=0
+  plcirc.mstat=0
+  plcirc.lmstat=-1
+  plcirc.mfrm=0
+  plcirc.nrounds=0
 	end,
 
 	upd=function(self)
@@ -573,6 +583,9 @@ plcirc={
  devi = 0, --deviation
 
  laststatM=0,
+ mstat=0, --metronome sfx note index
+ lmstat=-1, --last metronome index
+ mfrm=0, --frames since metronome step
  --lhd = 0,
  --rhd = 0,
 	draw=function(self)
@@ -629,24 +642,27 @@ plcirc={
 		end
   --animate rotation continuously
   if 1==1 then
-   local taktzeit = 60/bpm*self.btl
-   local frmspertakt = taktzeit * 60
-   local gradprofrm = 360/frmspertakt*2
-   
-   self.plang = self.plang + 1/360 * gradprofrm
-   --synchronize to tracker
-   if stat(50+metroch) == 0 and self.newr == 1 then 
-    self.plang = 0
-    self.newr = 0
+   --derive the angle from the
+   --metronome sfx position instead
+   --of free-running with bpm. the
+   --old code only snapped back to 0
+   --after seeing step 2, so short or
+   --restarted loops could drift away
+   --from the audio tracker.
+   self.mstat=stat(50+metroch)
+   if self.mstat!=self.lmstat then
+    if self.mstat==0 and self.lmstat>=0 then
+     self.nrounds += 1
+    end
+    self.mfrm=0
+    self.lmstat=self.mstat
+   else
+    self.mfrm+=1
    end
-   if stat(50+metroch) == 2 then
-    self.newr = 1
-   end
-   
-   if stat(50+metroch) == 0 and self.laststatM!=0 then
-    self.nrounds += 1
-   end
-   self.laststatM=stat(50+metroch)
+   local frmperstep=max(1,spd/2)
+   local phase=self.mstat+self.mfrm/frmperstep
+   if phase>=self.btl then phase=self.btl-0.001 end
+   self.plang=phase/self.btl
 
    self.plpos = {self.center_x + self.radius * sin(self.plang+0.5),
    self.center_y + self.radius * cos(self.plang+0.5)}

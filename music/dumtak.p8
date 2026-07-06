@@ -25,6 +25,12 @@ function _draw()
 end
 
 function _update60()      
+	if (gst==gsidx["hear"] or gst==gsidx["play"]) and btn(4) and btn(5) then
+		gst=gsidx["menu"]
+		sfx(-1)
+		music(-1)
+		return
+	end
 	if gst==gsidx["menu"] then
 		menu:upd()
 	elseif gst==gsidx["intro"] then

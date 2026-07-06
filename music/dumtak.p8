@@ -26,7 +26,7 @@ end
 
 
 gsts={"menu","play","hear"} --game states
-gst=2 --actual game state
+gst=1 --actual game state
 gsidx={}
 a_bt=2 --active beat
 bidx=0 --beat index (current note)

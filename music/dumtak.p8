@@ -154,21 +154,21 @@ intro={
 	mode="play",
 	draw=function(s)
 		spr(128,0,0,16,4)
-		print(s.mode.." mode",24,40,7)
+		print(s.mode.." mode",20,40,9)
 		if s.mode=="play" then
-			print("spiele den rhythmus",24,50,7)
-			print("passend zum kreis.",24,58,7)
-			print("⬅️ tak   ➡️ dum",24,74,3)
-			print("⬆️ ⬇️ tempo",24,84,3)
-			print("🅾️/x ❎/c rhythmus",24,94,3)
+			print("play the rhythm",20,50,7)
+			print("the circle shows you how.",20,58,7)
+			print("⬅️ tak   ➡️ dum",20,74,3)
+			print("⬆️ ⬇️ tempo",20,84,3)
+			print("🅾️/x ❎/c rhythm",20,94,3)
 		else
-			print("hoere den rhythmus",24,50,7)
-			print("und baue ihn nach.",24,58,7)
-			print("⬅️ ➡️ position",24,74,3)
-			print("⬆️ ⬇️ silbe",24,84,3)
-			print("🅾️/x pruefen",24,94,3)
+			print("hear the rhythm",20,50,7)
+			print("and build it",20,58,7)
+			print("⬅️ ➡️ position",20,74,3)
+			print("⬆️ ⬇️ place",20,84,3)
+			print("🅾️/x check",20,94,3)
 		end
-		print("❎/c start",24,114,9)
+		print("❎/c start",20,114,9)
 	end,
 	upd=function(s)
 		if btnp(4) then

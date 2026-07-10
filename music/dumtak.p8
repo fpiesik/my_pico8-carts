@@ -1,6 +1,83 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+--main functions
+
+--settings
+spd=60 --speed in bpm
+vism=1 --visualisation mode: circle and/or score btsfx
+lvld={ --levels of difficulty
+	syl=0, -- syllables
+	nts=0, --notes
+	idxc=1, -- beat position circle
+	eidxc=1, 
+	idxs=1,-- beat position score
+	eidxs=1,
+	np=1, --number of pulses
+	nm=1, --name of the rhythm
+	drani=1, -- animation of the drumming
+ 	hnd=1 -- hands
+}
+--colors
+clrs={ 
+	bck=1, --background
+	btn=9, --beat name
+	syl={5,9,11}, --syllables
+	btpos=15, --beat position 
+	scr={3,8}, --score color
+	epos=8, --edit position
+	tsig=3, --time signature
+	spd=3, --speed (bpm)
+	posn=4,
+	hdng=3, --heading
+	info=6, --infotext
+	ctl=6, --controls
+	menu=15,
+}
+
+--constants
+btsfx=8 --beat sfx
+btch=0 --beat audio channel 
+metrosfx=9 --metronome sfx
+metroch=1 --metronome audio channel
+essfx=0 --es sfx
+dumsfx=1 --dum sfx
+taksfx=2 --tak sfx
+gsts={"menu","intro","play","hear","tutorial"} --game states
+
+--globals
+gst=1 --current game state
+gsidx={}
+a_bt=2 --active beat
+bidx=0 --beat index (current note)
+
+--score
+scr={
+ hit=0,
+ mss=0
+}
+
+--beat order
+btord={"stop","maksum","ayub","beledi","saidi","saudi","masmudi","melfuf","chiftetelli","elzaffa","karshilama","rumba","frank"}
+
+beats={
+ stop={0},
+ maksum={1,2,0,2,1,0,2,0},
+ ayub={1,0,1,2},
+ beledi={1,1,0,2,1,0,2,0},
+	saidi={1,2,0,1,1,0,2,0},
+ saudi={1,0,0,1,0,0,2,0},
+ masmudi={1,1,0,0,1,0,0,0},
+ melfuf={1,0,0,2,0,0,2,0},
+ chiftetelli={1,0,2,2,0,2,2,0,1,0,1,0,2,0,0,0},
+ elzaffa={1,0,2,2,2,0,2,0,1,0,2,2,0,0,0},
+ karshilama={1,0,2,0,1,0,2,2,2},
+ rumba={1,0,0,0,1,0,2,0},
+ frank={1,1,2,1,1,0,2,0}
+}
+
+--syllables
+syl={"es","dum","tak"}
 
 function _init()
 	--make an index of the game states
@@ -44,92 +121,32 @@ function _update60()
 end
 
 
-gsts={"menu","intro","play","hear"} --game states
-gst=1 --actual game state
-gsidx={}
-a_bt=2 --active beat
-bidx=0 --beat index (current note)
-spd=60 --speed
-vism=1 --visualisation mode: circle and/or score btsfx
-btsfx=8 --beat sfx
-btch=0 --beat audio channel 
-metrosfx=9 --metronome sfx
-metroch=1 --metronome audio channel
-essfx=0 --es sfx
-dumsfx=1 --dum sfx
-taksfx=2 --tak sfx
-bpm=90
 
-lvld={ --levels of difficulty
-	syl=0, -- syllables
-	nts=0, --notes
-	idxc=1, -- beat position circle
-	eidxc=1, 
-	idxs=1,-- beat position score
-	eidxs=1,
-	np=1, --number of pulses
-	nm=1, --name of the rhythm
-	drani=1, -- animation of the drumming
- 	hnd=1 -- hands
-}
 
---colors
-clrs={ 
-	bck=1, --background
-	btn=9, --beat name
-	syl={5,9,11}, --syllables
-	scr={3,8}, --score color
-	btpos=15, --beat position 
-	epos=8, --edit position
-	tsig=3, --time signature
-	spd=3, --speed (bpm)
-	posn=4 
-}
 
---score
-scr={
- hit=0,
- mss=0
-}
 
---beat order
-btord={"stop","maksum","ayub","beledi","saidi","saudi","masmudi","melfuf","chiftetelli","elzaffa","karshilama","rumba","frank"}
 
-beats={
- stop={0},
- maksum={1,2,0,2,1,0,2,0},
- ayub={1,0,1,2},
- beledi={1,1,0,2,1,0,2,0},
-	saidi={1,2,0,1,1,0,2,0},
- saudi={1,0,0,1,0,0,2,0},
- masmudi={1,1,0,0,1,0,0,0},
- melfuf={1,0,0,2,0,0,2,0},
- chiftetelli={1,0,2,2,0,2,2,0,1,0,1,0,2,0,0,0},
- elzaffa={1,0,2,2,2,0,2,0,1,0,2,2,0,0,0},
- karshilama={1,0,2,0,1,0,2,2,2},
- rumba={1,0,0,0,1,0,2,0},
- frank={1,1,2,1,1,0,2,0}
-}
 
---syllables
-syl={"es","dum","tak"}
-sylc={2,3,9}
 
---title screen
+  
+
+
+-->8
+--title and tutorial screen
 menu={
-	x = 40,
+	x = 50,
 	y = 60,
 	spc = 7,
 	idx = 1,
-	opts = {"play","hear"},
+	opts = {"tutorial","play","hear"},
 	draw=function(s)
 		for i = 1, #s.opts do
-			print(s.opts[i],s.x,s.y+i*s.spc,7)
+			print(s.opts[i],s.x,s.y+i*s.spc,clrs.menu)
 			--if(i==s.idx)rect(s.x-2,s.y+i*s.spc-2,s.x+30,s.y+i*s.spc+6,7)
-			if(i==s.idx)print("➡️",s.x-10,s.y+i*s.spc,7)
+			if(i==s.idx)print("➡️",s.x-10,s.y+i*s.spc,clrs.menu)
 		end
   spr(128,0,0,16,4)
-  print("❎/c start",44,114,10)
+  print("❎/c start",40,114,clrs.ctl)
 	end,
 	upd=function(s)
 		if btnp(3) then
@@ -141,6 +158,9 @@ menu={
 			if(s.idx<1)s.idx=1
 		end
 		if btnp(4) then
+			if s.opts[s.idx]=="tutorial" then
+				gst=gsidx("tutorial")
+			end	
 			intro.mode=s.opts[s.idx]
 			gst=gsidx["intro"]
 			sfx(-1)
@@ -154,21 +174,21 @@ intro={
 	mode="play",
 	draw=function(s)
 		spr(128,0,0,16,4)
-		print(s.mode.." mode",20,40,9)
+		print(s.mode.." mode",20,40,clrs.hdng)
 		if s.mode=="play" then
-			print("play the rhythm",20,50,7)
-			print("the circle shows you how.",20,58,7)
-			print("⬅️ tak   ➡️ dum",20,74,3)
-			print("⬆️ ⬇️ tempo",20,84,3)
-			print("🅾️/x ❎/c rhythm",20,94,3)
+			print("play the rhythm",20,50,clrs.info)
+			print("the circle shows you how.",20,58,clrs.info)
+			print("⬅️ tak   ➡️ dum",20,74,clrs.ctl)
+			print("⬆️ ⬇️ tempo",20,84,clrs.ctl)
+			print("🅾️/x ❎/c rhythm",20,94,clrs.ctl)
 		else
-			print("hear the rhythm",20,50,7)
-			print("and build it",20,58,7)
-			print("⬅️ ➡️ position",20,74,3)
-			print("⬆️ ⬇️ place",20,84,3)
-			print("🅾️/x check",20,94,3)
+			print("hear the rhythm",20,50,clrs.info)
+			print("and build it",20,58,clrs.info)
+			print("⬅️ ➡️ position",20,74,clrs.ctl)
+			print("⬆️ ⬇️ place",20,84,clrs.ctl)
+			print("🅾️/x check",20,94,clrs.ctl)
 		end
-		print("❎/c start",20,114,9)
+		print("❎/c start",20,114,clrs.ctl)
 	end,
 	upd=function(s)
 		if btnp(4) then
@@ -182,124 +202,28 @@ intro={
 	end
 }
 
---transcribe rhythms screen
-hear={
-	ansbt={},
-	qstbt={},
-	crr={0,0}, --correctness
-	btl=0, --beat length
-	abtl=0, --answer beat length
-	mxbtl=32,
-	
-	init=function(self)
-		self.correct=0
-		a_bt=flr(rnd(#btord))+1
-		self.btl=#beats[btord[a_bt]]
-		self.abtl=#beats[btord[a_bt]]
-		lvld.syl=0
-		--self.ansbt=beats[btord[a_bt]]
-		for i=1,self.mxbtl do 
-			self.ansbt[i]=0
-		end
-		for i=1,self.btl do 
-			self.qstbt[i]=beats[btord[a_bt]][i]
-		end
-		set_spd(btsfx,spd)
-		mk_beat(a_bt) 
-		bcirc.btl = self.btl
-		bcirc.abtl = self.abtl
-		bcirc.ansbt = self.ansbt
-		bcirc.qstbt = self.qstbt
-	end,
+--ich moechte so gerne trommeln 
+--koennen wie du, grosser meister
+--bitte unterrichte mich!
 
-	upd=function(self)
-	 	if btnp(1) then 
-			bidx=bidx+1
-   			if bidx>self.abtl-1 then bidx=0 
-			end
-		end
-		if btnp(0) then 
-			bidx=bidx-1 
-   			if bidx<0 then bidx=self.abtl-1
-			end
-		end
-		if btnp(3) then
-			self.ansbt[bidx+1]=self.ansbt[bidx+1]+1
-			if self.ansbt[bidx+1]>2 then self.ansbt[bidx+1]=0
-			end
-		end
-		if btnp(2) then
-	 		self.ansbt[bidx+1]=self.ansbt[bidx+1]-1
-	 		if self.ansbt[bidx+1]<0 then self.ansbt[bidx+1]=2
-			end
-		end
-		if btnp(4) then
-	 		self:chck()
-	 		if self.correct==1 then self:init()
-			end
-		end
-		if btn(5) and btnp(1) then
-			self.abtl=self.abtl+1
-	 		if self.abtl>24 then self.abtl=24
-			end
-		end
-		if btn(5) and btnp(0) then
-	 		self.abtl=self.abtl-1
-	 		if self.abtl<0 then self.abtl=0
-			end
-		end
-		if btn(5) and btnp(3) then
-			spd=spd+1
-	 		if spd>100 then pd=100
-			end
-  			set_spd(btsfx,spd)
-		end
-		if btn(5) and btnp(2) then
-			spd=spd-1
-			if spd<5 then spd=5
-			end
-			set_spd(btsfx,spd)
-		end
-		bcirc.btl = self.btl
-		bcirc.abtl = self.abtl
-		bcirc.ansbt = self.ansbt
-		bcirc.qstbt = self.qstbt
-	end,
+--ich spuere, starke musikvibes
+--du hast. 
+--erweise dich als wuerdig und 
+--uebe jeden tag 5 stunden.
 
-	draw=function(self)
-		print(btord[a_bt],5,5,clrs.btn)
-		--print(stat(50))
-		bcirc:draw()
-		if(vism==2)bscore:draw()
-		
-		print(scr.hit,109,5,clrs.scr[1])
-		print(scr.mss,117,5,clrs.scr[2])
-		
-		print("bpm:",5,12,clrs.spd)	
-		print(flr(spd2bpm(spd)),21,12,clrs.spd)	
+--ok, das werde ich, meister mu.
+--aber wie fange ich an? was ist
+--das geheimnis des dumtak?
 
-		if(stat(50+btch)<=8)print(stat(50+btch)+1, 109, 120,clrs.tsig)
-		if(stat(50+btch)>8)print(stat(50+btch)+1, 105, 120,clrs.tsig)
-		print("/", 113, 120,clrs.tsig)
-		print(self.btl, 117, 120,clrs.tsig)
-	end,
+--dum, tak und es sind die
+--heiligen silben der arabischen
+--rhythmussprache.  
 
-	chck=function(self)
-		self.crr[2]=1
-		for i=1,self.btl do
-			if(self.ansbt[i]!=self.qstbt[i]) self.crr[2]=0
-		end
-		if (self.btl == self.abtl) self.crr[1]=1
-		if self.crr[2] == 1 and self.crr[1] == 1 then
-			scr.hit+=1
-			spr(5,60,60,4,4)
-			self:init()
-		else
-			scr.mss+=1
-		end
-	end
-}
 
+
+ 
+-->8
+--play mode
 play={
 	ansbt={},
 	qstbt={},
@@ -432,129 +356,7 @@ play={
 	end
 }
 
-bcirc={
- 	center_x = 63,
-	center_y = 54,
-	radius = 38,
-	btnmb = 0,
-	btl = 0,
-	qstbt = {},
-	ansbt = {},
-	i=1,
-	stat=0,
-	lstat=0,
- 	draw=function(self)
-		self.btnmb = a_bt
-		--self.btl = play.abtl
-		self.stat=stat(50+btch)
-		if(vism==1) then
-		 	self.center_x = 63
-		 	self.center_y = 66
-  			self.radius = 50
-		end
-	 	if(vism==2) then
-			self.center_x = 63
-			self.center_y = 54
-			self.radius = 38
-	 	end
-		self.btnmb = a_bt
-	 	
-		local note
-	 
-	 	--spr(0,self.center_x-32,self.center_y-32,8,8)
-	 	for i=1, self.btl do
-			if(lvld.syl==1)note=self.qstbt[i]
-   			if(lvld.syl==0)note=self.ansbt[i]
-   			local angle = (i-1)/self.btl
-			local x = self.center_x + self.radius * sin(angle+0.5)
-   			local y = self.center_y + self.radius * cos(angle+0.5)
-			local xi = self.center_x + (self.radius-13) * sin(angle+0.5)
-   			local yi = self.center_y + (self.radius-13) * cos(angle+0.5)
-			if(note==0)color=clrs.syl[1]
-			if(note==1)color=clrs.syl[2]
-			if(note==2)color=clrs.syl[3]
-			if(bidx+1==i and lvld.eidxc==1) then
-				circ(x,y,8,clrs.epos)
-			end
-			if(self.stat+1==i and lvld.idxc==1) then
-				circ(x,y,9,clrs.btpos)
-			elseif(self.stat+1==1 and lvld.idxc==0 and i==1) then
-				circ(x,y,9,clrs.btpos)
-			end
-			if note==0 then
-				x-=3
-				y-=2
-			end
-			if note==1 then
-				x -= 5
-				y -= 2
-			end
-			if note==2 then
-				x -= 5
-				y -= 2
-   			end
-   			print(syl[note+1], x, y,color)
-			print(i, xi - 1, yi - 2, clrs.posn)
-	 	end
-		self:hands()
-	end,
-	
-	rhd = 0,
-	lhd = 0,
-	rhpos = {-1},	
-	lhpos = {},
-	hands=function(self)	 
-		local nt = 0
-		local spdhit =2
-		local spdbck =5
-		local rhst = {self.center_x-5,self.center_y-5}
-		local lhst = {self.center_x-32,self.center_y+5}
-		local rhmov = {-5,-5}
-		local lhmov = {4,-4}
-		if(lvld.hnd == 0)nt = self.ansbt[self.stat+1]
-		if(lvld.hnd == 1)nt = self.qstbt[self.stat+1]
-		if(self.rhpos[1]==-1) then 
-		self.rhpos[1]=rhst[1]
-		self.rhpos[2]=rhst[2]
-		self.lhpos[1]=lhst[1]
-		self.lhpos[2]=lhst[2]
-		end
-
-		if(self.rhpos[1]==rhst[1])self.rhd = 0
-		if(self.lhpos[1]==lhst[1])self.lhd = 0
-
-		if self.lstat!=self.stat then
-			if (nt == 1) self.rhd = 1
-			if (nt == 2) self.lhd = 1
-			self.lstat=self.stat
-		end
-
-		if btn(4) then self.rhd = 1 end 
-		if btn(5) then self.lhd = 1 end 
-
-		if(self.rhpos[1]<=rhst[1]+rhmov[1])self.rhd = -1
-		if(self.lhpos[1]>=lhst[1]+lhmov[1])self.lhd = -1
-
-		if self.rhd==1 then 
-			self.rhpos[1]+=rhmov[1]
-			self.rhpos[2]+=rhmov[2]
-		elseif(self.rhd==-1) then 
-			self.rhpos[1] += 1
-			self.rhpos[2] += 1
-		end
-		if self.lhd==1 then 
-			self.lhpos[1]+=lhmov[1]
-			self.lhpos[2]+=lhmov[2]
-		elseif(self.lhd== -1) then 
-			self.lhpos[1] -= 1
-			self.lhpos[2] += 1
-		end
-		spr(0,self.center_x-32,self.center_y-32,8,8)
-		spr(8,self.rhpos[1],self.rhpos[2],4,4)
-		spr(8,self.lhpos[1],self.lhpos[2],4,4,1)
-	 end
-}
-
+--play circ
 plcirc={
 	center_x = 63,
 	center_y = 54,
@@ -770,6 +572,252 @@ plcirc={
 	end
 }
 
+-->8
+--hear mode
+hear={
+	ansbt={},
+	qstbt={},
+	crr={0,0}, --correctness
+	btl=0, --beat length
+	abtl=0, --answer beat length
+	mxbtl=32,
+	
+	init=function(self)
+		self.correct=0
+		a_bt=flr(rnd(#btord))+1
+		self.btl=#beats[btord[a_bt]]
+		self.abtl=#beats[btord[a_bt]]
+		lvld.syl=0
+		--self.ansbt=beats[btord[a_bt]]
+		for i=1,self.mxbtl do 
+			self.ansbt[i]=0
+		end
+		for i=1,self.btl do 
+			self.qstbt[i]=beats[btord[a_bt]][i]
+		end
+		set_spd(btsfx,spd)
+		mk_beat(a_bt) 
+		bcirc.btl = self.btl
+		bcirc.abtl = self.abtl
+		bcirc.ansbt = self.ansbt
+		bcirc.qstbt = self.qstbt
+	end,
+
+	upd=function(self)
+	 	if btnp(1) then 
+			bidx=bidx+1
+   			if bidx>self.abtl-1 then bidx=0 
+			end
+		end
+		if btnp(0) then 
+			bidx=bidx-1 
+   			if bidx<0 then bidx=self.abtl-1
+			end
+		end
+		if btnp(3) then
+			self.ansbt[bidx+1]=self.ansbt[bidx+1]+1
+			if self.ansbt[bidx+1]>2 then self.ansbt[bidx+1]=0
+			end
+		end
+		if btnp(2) then
+	 		self.ansbt[bidx+1]=self.ansbt[bidx+1]-1
+	 		if self.ansbt[bidx+1]<0 then self.ansbt[bidx+1]=2
+			end
+		end
+		if btnp(4) then
+	 		self:chck()
+	 		if self.correct==1 then self:init()
+			end
+		end
+		if btn(5) and btnp(1) then
+			self.abtl=self.abtl+1
+	 		if self.abtl>24 then self.abtl=24
+			end
+		end
+		if btn(5) and btnp(0) then
+	 		self.abtl=self.abtl-1
+	 		if self.abtl<0 then self.abtl=0
+			end
+		end
+		if btn(5) and btnp(3) then
+			spd=spd+1
+	 		if spd>100 then pd=100
+			end
+  			set_spd(btsfx,spd)
+		end
+		if btn(5) and btnp(2) then
+			spd=spd-1
+			if spd<5 then spd=5
+			end
+			set_spd(btsfx,spd)
+		end
+		bcirc.btl = self.btl
+		bcirc.abtl = self.abtl
+		bcirc.ansbt = self.ansbt
+		bcirc.qstbt = self.qstbt
+	end,
+
+	draw=function(self)
+		print(btord[a_bt],5,5,clrs.btn)
+		--print(stat(50))
+		bcirc:draw()
+		if(vism==2)bscore:draw()
+		
+		print(scr.hit,109,5,clrs.scr[1])
+		print(scr.mss,117,5,clrs.scr[2])
+		
+		print("bpm:",5,12,clrs.spd)	
+		print(flr(spd2bpm(spd)),21,12,clrs.spd)	
+
+		if(stat(50+btch)<=8)print(stat(50+btch)+1, 109, 120,clrs.tsig)
+		if(stat(50+btch)>8)print(stat(50+btch)+1, 105, 120,clrs.tsig)
+		print("/", 113, 120,clrs.tsig)
+		print(self.btl, 117, 120,clrs.tsig)
+	end,
+
+	chck=function(self)
+		self.crr[2]=1
+		for i=1,self.btl do
+			if(self.ansbt[i]!=self.qstbt[i]) self.crr[2]=0
+		end
+		if (self.btl == self.abtl) self.crr[1]=1
+		if self.crr[2] == 1 and self.crr[1] == 1 then
+			scr.hit+=1
+			spr(5,60,60,4,4)
+			self:init()
+		else
+			scr.mss+=1
+		end
+	end
+}
+
+--bcirc
+bcirc={
+ center_x = 63,
+	center_y = 54,
+	radius = 38,
+	btnmb = 0,
+	btl = 0,
+	qstbt = {},
+	ansbt = {},
+	i=1,
+	stat=0,
+	lstat=0,
+ 	draw=function(self)
+		self.btnmb = a_bt
+		--self.btl = play.abtl
+		self.stat=stat(50+btch)
+		if(vism==1) then
+		 	self.center_x = 63
+		 	self.center_y = 66
+  			self.radius = 50
+		end
+	 	if(vism==2) then
+			self.center_x = 63
+			self.center_y = 54
+			self.radius = 38
+	 	end
+		self.btnmb = a_bt
+	 	
+		local note
+	 
+	 	--spr(0,self.center_x-32,self.center_y-32,8,8)
+	 	for i=1, self.btl do
+			if(lvld.syl==1)note=self.qstbt[i]
+   			if(lvld.syl==0)note=self.ansbt[i]
+   			local angle = (i-1)/self.btl
+			local x = self.center_x + self.radius * sin(angle+0.5)
+   			local y = self.center_y + self.radius * cos(angle+0.5)
+			local xi = self.center_x + (self.radius-13) * sin(angle+0.5)
+   			local yi = self.center_y + (self.radius-13) * cos(angle+0.5)
+			if(note==0)color=clrs.syl[1]
+			if(note==1)color=clrs.syl[2]
+			if(note==2)color=clrs.syl[3]
+			if(bidx+1==i and lvld.eidxc==1) then
+				circ(x,y,8,clrs.epos)
+			end
+			if(self.stat+1==i and lvld.idxc==1) then
+				circ(x,y,9,clrs.btpos)
+			elseif(self.stat+1==1 and lvld.idxc==0 and i==1) then
+				circ(x,y,9,clrs.btpos)
+			end
+			if note==0 then
+				x-=3
+				y-=2
+			end
+			if note==1 then
+				x -= 5
+				y -= 2
+			end
+			if note==2 then
+				x -= 5
+				y -= 2
+   			end
+   			print(syl[note+1], x, y,color)
+			print(i, xi - 1, yi - 2, clrs.posn)
+	 	end
+		self:hands()
+	end,
+	
+	rhd = 0,
+	lhd = 0,
+	rhpos = {-1},	
+	lhpos = {},
+	hands=function(self)	 
+		local nt = 0
+		local spdhit =2
+		local spdbck =5
+		local rhst = {self.center_x-5,self.center_y-5}
+		local lhst = {self.center_x-32,self.center_y+5}
+		local rhmov = {-5,-5}
+		local lhmov = {4,-4}
+		if(lvld.hnd == 0)nt = self.ansbt[self.stat+1]
+		if(lvld.hnd == 1)nt = self.qstbt[self.stat+1]
+		if(self.rhpos[1]==-1) then 
+		self.rhpos[1]=rhst[1]
+		self.rhpos[2]=rhst[2]
+		self.lhpos[1]=lhst[1]
+		self.lhpos[2]=lhst[2]
+		end
+
+		if(self.rhpos[1]==rhst[1])self.rhd = 0
+		if(self.lhpos[1]==lhst[1])self.lhd = 0
+
+		if self.lstat!=self.stat then
+			if (nt == 1) self.rhd = 1
+			if (nt == 2) self.lhd = 1
+			self.lstat=self.stat
+		end
+
+		if btn(4) then self.rhd = 1 end 
+		if btn(5) then self.lhd = 1 end 
+
+		if(self.rhpos[1]<=rhst[1]+rhmov[1])self.rhd = -1
+		if(self.lhpos[1]>=lhst[1]+lhmov[1])self.lhd = -1
+
+		if self.rhd==1 then 
+			self.rhpos[1]+=rhmov[1]
+			self.rhpos[2]+=rhmov[2]
+		elseif(self.rhd==-1) then 
+			self.rhpos[1] += 1
+			self.rhpos[2] += 1
+		end
+		if self.lhd==1 then 
+			self.lhpos[1]+=lhmov[1]
+			self.lhpos[2]+=lhmov[2]
+		elseif(self.lhd== -1) then 
+			self.lhpos[1] -= 1
+			self.lhpos[2] += 1
+		end
+		spr(0,self.center_x-32,self.center_y-32,8,8)
+		spr(8,self.rhpos[1],self.rhpos[2],4,4)
+		spr(8,self.lhpos[1],self.lhpos[2],4,4,1)
+	 end
+}
+
+
+-->8
+--bscore
 
 bscore={
 	x=2, --x-pos
@@ -829,8 +877,8 @@ bscore={
 	end
 }
 
-
-
+-->8
+--helper
 function mk_beat(idx)
 	set_loop(btsfx,0,#beats[btord[idx]])
 	for x=1,#beats[btord[idx]] do
@@ -960,10 +1008,6 @@ function rrectfill(x0, y0, x1, y1, col, edgeR)
         line(xl, y, xr, y, col)
     end
 end
-
-
-  
-
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
